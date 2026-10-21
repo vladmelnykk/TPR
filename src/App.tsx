@@ -3,6 +3,7 @@ import AppLayout from './layouts/AppLayout'
 import Lab1Page from './pages/Lab1Page'
 import Lab2Page from './pages/Lab2Page'
 import GroupDecisionPage from './pages/GroupDecisionPage'
+import HierarchyPage from './pages/HierarchyPage'
 import StubPage from './pages/StubPage'
 
 export default function App() {
@@ -13,6 +14,8 @@ export default function App() {
           <Route index element={<Lab1Page />} />
           <Route path="group-decisions" element={<GroupDecisionPage />} />
           <Route path="lab3" element={<Navigate to="/group-decisions" replace />} />
+          <Route path="hierarchy" element={<HierarchyPage />} />
+          <Route path="lab4" element={<Navigate to="/hierarchy" replace />} />
           <Route path="risk" element={<Lab2Page />} />
           <Route path="lab2" element={<Navigate to="/risk" replace />} />
           <Route path="*" element={<StubPage />} />
