@@ -72,15 +72,38 @@ const proposal = (id: string, title: string, extra: Partial<Proposal> = {}): Pro
 const initialCauses: Cause[] = [
   { id: 'c1', title: 'Незрозумілий розподіл відповідальності', proposals: [
     proposal('p1', 'Узгодити ролі та відповідальних', { selected: true, duration: 2, owner: 'Олена', votes: { e1: 5, e2: 4, e3: 5 } }),
-    proposal('p2', 'Запровадити щоденні зустрічі', { votes: { e1: 3, e2: 4, e3: 3 } }),
+    proposal('p2', 'Запровадити короткі щоденні зустрічі команди', { duration: 1, owner: 'Марія', votes: { e1: 3, e2: 4, e3: 3 } }),
+    proposal('p3', 'Описати зони відповідальності у спільному довіднику', { duration: 2, owner: 'Олена', votes: { e1: 4, e2: 4, e3: 5 } }),
+    proposal('p4', 'Призначити резервного виконавця для ключових завдань', { duration: 1, owner: 'Андрій', votes: { e1: 4, e2: 3, e3: 4 } }),
+    proposal('p5', 'Погоджувати кожне завдання лише з керівником', { acceptable: false, duration: 1, owner: 'Олена', votes: { e1: 2, e2: 1, e3: 2 } }),
   ] },
   { id: 'c2', title: 'Завдання надходять через різні канали', proposals: [
-    proposal('p3', 'Створити єдину дошку завдань', { selected: true, duration: 3, owner: 'Андрій', dependsOn: ['p1'], votes: { e1: 5, e2: 5, e3: 4 } }),
-    proposal('p4', 'Збирати запити електронною поштою', { acceptable: false }),
+    proposal('p6', 'Створити єдину дошку завдань', { selected: true, duration: 3, owner: 'Андрій', dependsOn: ['p1'], votes: { e1: 5, e2: 5, e3: 4 } }),
+    proposal('p7', 'Збирати всі запити електронною поштою', { acceptable: false, duration: 1, owner: 'Марія', votes: { e1: 2, e2: 2, e3: 3 } }),
+    proposal('p8', 'Створити форму подання нового запиту', { duration: 2, owner: 'Андрій', votes: { e1: 4, e2: 5, e3: 4 } }),
+    proposal('p9', 'Затвердити єдиний шаблон опису завдання', { duration: 1, owner: 'Олена', votes: { e1: 4, e2: 4, e3: 4 } }),
+    proposal('p10', 'Призначити координатора вхідних запитів', { duration: 1, owner: 'Марія', votes: { e1: 3, e2: 4, e3: 4 } }),
   ] },
   { id: 'c3', title: 'Команда пізно помічає затримки', proposals: [
-    proposal('p5', 'Налаштувати сповіщення про строки', { selected: true, duration: 1, owner: 'Марія', dependsOn: ['p3'], votes: { e1: 4, e2: 5, e3: 5 } }),
-    proposal('p6', 'Переглядати прогрес щотижня', { votes: { e1: 4, e2: 4, e3: 4 } }),
+    proposal('p11', 'Налаштувати сповіщення про строки на дошці завдань', { selected: true, duration: 1, owner: 'Марія', dependsOn: ['p6'], votes: { e1: 4, e2: 5, e3: 5 } }),
+    proposal('p12', 'Переглядати прогрес щотижня', { duration: 1, owner: 'Олена', votes: { e1: 4, e2: 4, e3: 4 } }),
+    proposal('p13', 'Відстежувати час перебування завдань у кожному статусі', { duration: 2, owner: 'Андрій', votes: { e1: 4, e2: 5, e3: 4 } }),
+    proposal('p14', 'Узгодити порядок повідомлення про блокування', { duration: 1, owner: 'Марія', votes: { e1: 5, e2: 4, e3: 4 } }),
+    proposal('p15', 'Збирати погодинні звіти від кожного виконавця', { acceptable: false, duration: 2, owner: 'Олена', votes: { e1: 1, e2: 2, e3: 1 } }),
+  ] },
+  { id: 'c4', title: 'Забагато одночасних завдань і суперечливі пріоритети', proposals: [
+    proposal('p16', 'Узгодити пріоритети та ліміти одночасної роботи', { selected: true, duration: 2, owner: 'Олена', dependsOn: ['p1'], votes: { e1: 5, e2: 4, e3: 5 } }),
+    proposal('p17', 'Виділити окремий час для термінових запитів', { duration: 1, owner: 'Марія', votes: { e1: 4, e2: 3, e3: 4 } }),
+    proposal('p18', 'Щотижня переглядати чергу завдань із замовниками', { duration: 1, owner: 'Олена', votes: { e1: 4, e2: 4, e3: 5 } }),
+    proposal('p19', 'Планувати навантаження з резервом на непередбачені роботи', { duration: 2, owner: 'Андрій', votes: { e1: 4, e2: 5, e3: 4 } }),
+    proposal('p20', 'Виконувати всі нові запити негайно', { acceptable: false, duration: 1, owner: 'Марія', votes: { e1: 1, e2: 1, e3: 2 } }),
+  ] },
+  { id: 'c5', title: 'Команда не має спільних навичок роботи за новим процесом', proposals: [
+    proposal('p21', 'Провести навчання роботі з дошкою та правилами пріоритетів', { selected: true, duration: 2, owner: 'Андрій', dependsOn: ['p6', 'p16'], votes: { e1: 5, e2: 5, e3: 4 } }),
+    proposal('p22', 'Провести спільний пілот і розібрати його результати', { selected: true, duration: 1, owner: 'Марія', dependsOn: ['p11', 'p21'], votes: { e1: 5, e2: 4, e3: 5 } }),
+    proposal('p23', 'Підготувати коротку інструкцію з прикладами', { duration: 2, owner: 'Олена', votes: { e1: 4, e2: 4, e3: 5 } }),
+    proposal('p24', 'Запровадити наставництво для нових учасників', { duration: 3, owner: 'Андрій', votes: { e1: 4, e2: 3, e3: 4 } }),
+    proposal('p25', 'Залишити освоєння процесу виключно на самостійне вивчення', { acceptable: false, duration: 1, owner: 'Олена', votes: { e1: 2, e2: 2, e3: 1 } }),
   ] },
 ]
 

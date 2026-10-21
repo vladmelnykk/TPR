@@ -8,13 +8,22 @@ const task = (id: string, duration: number, dependsOn: string[] = []): PlannedTa
   owner: '', votes: {}, acceptable: true, selected: true,
 })
 
-test('початковий приклад: 6 днів, послідовність із трьох критичних дій', () => {
-  const tasks = getTasks(useGroupDecisionStore.getState().causes)
+test('початковий приклад: 5 причин по 5 пропозицій і план із розгалуженням та об’єднанням', () => {
+  const { causes, experts } = useGroupDecisionStore.getState()
+  assert.equal(causes.length, 5)
+  assert.ok(causes.every(cause => cause.proposals.length === 5))
+  assert.ok(causes.flatMap(cause => cause.proposals).every(p => scoreProposal(p, experts).count === 3))
+  const tasks = getTasks(causes)
   const plan = calculatePlan(tasks)
+  assert.equal(tasks.length, 6)
   assert.equal(plan.error, null)
-  assert.equal(plan.duration, 6)
-  assert.deepEqual(plan.timings.p3, { start: 2, finish: 5, slack: 0 })
-  assert.ok(tasks.every(task => plan.timings[task.id].slack === 0))
+  assert.equal(plan.duration, 8)
+  assert.deepEqual(plan.timings.p6, { start: 2, finish: 5, slack: 0 })
+  assert.deepEqual(plan.timings.p16, { start: 2, finish: 4, slack: 1 })
+  assert.deepEqual(plan.timings.p21, { start: 5, finish: 7, slack: 0 })
+  assert.deepEqual(plan.timings.p22, { start: 7, finish: 8, slack: 0 })
+  assert.equal(tasks.filter(task => task.dependsOn.includes('p1')).length, 2)
+  assert.deepEqual(tasks.find(task => task.id === 'p21')!.dependsOn, ['p6', 'p16'])
 })
 
 test('паралельні гілки: злиття чекає на всіх попередників, коротша гілка має резерв', () => {
@@ -59,12 +68,12 @@ test('відхилення або видалення дії очищує зал�
     initial.updateProposal('p1', { acceptable: false })
     let tasks = getTasks(useGroupDecisionStore.getState().causes)
     assert.ok(!tasks.some(t => t.id === 'p1'))
-    assert.deepEqual(tasks.find(t => t.id === 'p3')!.dependsOn, [])
-    assert.equal(calculatePlan(tasks).duration, 4)
+    assert.deepEqual(tasks.find(t => t.id === 'p6')!.dependsOn, [])
+    assert.equal(calculatePlan(tasks).duration, 6)
     initial.removeCause('c2')
     tasks = getTasks(useGroupDecisionStore.getState().causes)
-    assert.deepEqual(tasks.find(t => t.id === 'p5')!.dependsOn, [])
-    assert.equal(calculatePlan(tasks).duration, 1)
+    assert.deepEqual(tasks.find(t => t.id === 'p11')!.dependsOn, [])
+    assert.equal(calculatePlan(tasks).duration, 5)
   } finally { useGroupDecisionStore.setState(initial) }
 })
 
