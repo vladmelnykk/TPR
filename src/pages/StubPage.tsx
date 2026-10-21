@@ -1,15 +1,11 @@
-export default function StubPage({ number }: { number: number }) {
+import { Link } from 'react-router-dom'
+
+export default function StubPage() {
   return (
     <div className="flex flex-col items-center justify-center py-24 text-center">
-      <div className="rounded-2xl bg-gray-100 dark:bg-gray-800 p-8">
-        <p className="text-5xl">🚧</p>
-        <h1 className="mt-4 text-xl font-bold text-gray-800 dark:text-gray-200">
-          Лабораторна робота №{number}
-        </h1>
-        <p className="mt-2 text-gray-500 dark:text-gray-400">
-          Ця лабораторна поки що в розробці
-        </p>
-      </div>
+      <h1 className="text-xl font-bold">Сторінку не знайдено</h1>
+      <p className="mt-2 text-gray-500 dark:text-gray-400">Оберіть інструмент у меню або поверніться до аналізу альтернатив.</p>
+      <Link to="/" className="mt-4 rounded-lg bg-indigo-500 px-4 py-2 text-sm text-white hover:bg-indigo-600">До аналізу альтернатив</Link>
     </div>
-  );
+  )
 }

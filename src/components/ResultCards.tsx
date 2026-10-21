@@ -15,11 +15,13 @@ interface CriterionResult {
 function CriterionCard({
   title,
   formula,
+  description,
   result,
   color
 }: {
   title: string
   formula: string
+  description: string
   result: CriterionResult
   color: string
 }) {
@@ -29,6 +31,8 @@ function CriterionCard({
     >
       <h3 className="text-base font-bold text-gray-800 dark:text-gray-100">{title}</h3>
       <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 font-mono">{formula}</p>
+
+      <p className="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{description}</p>
 
       <div className="mt-3 space-y-1">
         {result.values.map((v, i) => {
@@ -82,24 +86,28 @@ export default function ResultCards() {
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <CriterionCard
         title="Максимакс"
+        description="Оптимістичний підхід: для кожного варіанта береться найбільший можливий виграш. Обирайте, якщо готові орієнтуватися на найсприятливіший сценарій."
         formula="M = maxᵢ maxⱼ aᵢⱼ"
         result={maximax}
         color="border-emerald-300 dark:border-emerald-700"
       />
       <CriterionCard
         title="Критерій Вальда"
+        description="Обережний підхід: для кожного варіанта береться найгірший результат, а серед них — найвищий. Допомагає захиститися за несприятливих умов."
         formula="W = maxᵢ minⱼ aᵢⱼ"
         result={wald}
         color="border-sky-300 dark:border-sky-700"
       />
       <CriterionCard
         title="Критерій Гурвіца"
-        formula={`H = maxᵢ {${q}·minⱼ + ${(1 - q).toFixed(1)}·maxⱼ}`}
+        description="Компроміс між найгіршим і найкращим виграшем. Чим більше q, тим більша вага найгіршого сценарію. Ймовірності не враховуються."
+        formula={`H = maxᵢ {${q}·minⱼ + ${(1 - q).toFixed(2)}·maxⱼ}`}
         result={hurwicz}
         color="border-amber-300 dark:border-amber-700"
       />
       <CriterionCard
-        title="Байєса-Лапласа"
+        title="Байєса–Лапласа"
+        description="Середній виграш з урахуванням ймовірностей сценаріїв. Обирається найбільше зважене середнє; це орієнтир для повторюваних рішень, а не гарантований результат."
         formula="Z = maxᵢ Σⱼ(aᵢⱼ·pⱼ)"
         result={bayesLaplace}
         color="border-violet-300 dark:border-violet-700"

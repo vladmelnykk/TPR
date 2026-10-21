@@ -5,10 +5,7 @@ import ThemeToggle from '../components/ThemeToggle'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Аналіз альтернатив в умовах невизначеності', active: true },
-  { to: '/lab2', label: 'Вибір рішення в умовах ризику', active: true }
-  // { to: '/lab3', label: 'ЛР №3', active: false },
-  // { to: '/lab4', label: 'ЛР №4', active: false },
-  // { to: '/lab5', label: 'ЛР №5', active: false }
+  { to: '/risk', label: 'Вибір рішення в умовах ризику', active: true }
 ]
 
 export default function AppLayout() {
@@ -28,6 +25,7 @@ export default function AppLayout() {
           <aside className="relative z-50 flex h-full w-64 flex-col bg-white dark:bg-gray-900 shadow-xl">
             <button
               className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              aria-label="Закрити меню"
               onClick={() => setSidebarOpen(false)}
             >
               <X size={20} />
@@ -38,16 +36,16 @@ export default function AppLayout() {
       )}
 
       {/* ─── Main ─── */}
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
         <header className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 md:px-6">
           <button
             className="md:hidden rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+            aria-label="Відкрити меню"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu size={22} />
           </button>
-          <h1 className="text-lg font-semibold hidden md:block">Теорія прийняття рішень</h1>
           <div className="ml-auto">
             <ThemeToggle />
           </div>
@@ -66,8 +64,10 @@ export default function AppLayout() {
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <>
-      <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-800 px-5 py-4">
-        <span className="text-xl opacity-0">📊</span>
+      <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-800 px-5 py-5">
+        <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300 opacity-0">
+          Аналіз рішень
+        </span>
       </div>
 
       <nav className="flex-1 space-y-1 p-3">

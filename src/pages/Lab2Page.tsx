@@ -1,3 +1,5 @@
+import UsageGuide from '../components/UsageGuide'
+import ProbabilityNotice from '../components/ProbabilityNotice'
 import type { ChangeEvent } from 'react'
 import { calcExpectedValue, calcSavage, calcVariance, useLab2Store } from '../stores/lab2Store'
 
@@ -10,16 +12,16 @@ export default function Lab2Page() {
 
   const handleCell = (r: number, c: number, e: ChangeEvent<HTMLInputElement>) => {
     const v = e.target.value === '' || e.target.value === '-' ? 0 : Number(e.target.value)
-    if (!Number.isNaN(v)) setCell(r, c, v)
+    if (Number.isFinite(v)) setCell(r, c, v)
   }
 
   const handleProb = (c: number, e: ChangeEvent<HTMLInputElement>) => {
     const v = e.target.value === '' ? 0 : Number(e.target.value)
-    if (!Number.isNaN(v)) setProbability(c, v)
+    if (Number.isFinite(v)) setProbability(c, v)
   }
 
   const probSum = probabilities.reduce((a, b) => a + b, 0)
-  const probSumOk = Math.abs(probSum - 1) < 0.001
+  const probSumOk = probabilities.every(p => p >= 0 && p <= 1) && Math.abs(probSum - 1) < 0.001
 
   /* ── computations ── */
   const hasData = numRows > 0 && numCols > 0
@@ -34,7 +36,13 @@ export default function Lab2Page() {
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">
           Вибір рішення в умовах ризику
         </h1>
+        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+          Порівняйте рішення, коли можете оцінити ймовірності сценаріїв. Зіставте
+          очікуваний виграш, втрачені можливості та коливання результату.
+        </p>
       </div>
+
+      <UsageGuide mode="risk" />
 
       {/* ─── Payoff Table ─── */}
       <section>
@@ -56,7 +64,7 @@ export default function Lab2Page() {
                           <button
                             onClick={() => removeCol(j)}
                             className="ml-1 text-red-400 hover:text-red-600 text-xs leading-none"
-                            title="Видалити стовпець"
+                            title={`Видалити сценарій F${j + 1}`}
                           >
                             ✕
                           </button>
@@ -69,7 +77,7 @@ export default function Lab2Page() {
                       onClick={addCol}
                       className="rounded-md bg-indigo-500 px-2 py-0.5 text-xs text-white hover:bg-indigo-600 transition-colors"
                     >
-                      + F
+                      + Сценарій
                     </button>
                   </th>
                 </tr>
@@ -88,7 +96,7 @@ export default function Lab2Page() {
                           <button
                             onClick={() => removeRow(i)}
                             className="text-red-400 hover:text-red-600 text-xs leading-none"
-                            title="Видалити рядок"
+                            title={`Видалити альтернативу A${i + 1}`}
                           >
                             ✕
                           </button>
@@ -99,7 +107,8 @@ export default function Lab2Page() {
                       <td key={j} className="px-2 py-1">
                         <input
                           type="number"
-                          value={val}
+                          aria-label={`Виграш A${i + 1} за сценарію F${j + 1}`}
+                      value={val}
                           onChange={e => handleCell(i, j, e)}
                           className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-center text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:text-gray-100 transition-colors"
                         />
@@ -123,7 +132,8 @@ export default function Lab2Page() {
                         step="0.1"
                         min="0"
                         max="1"
-                        value={p}
+                        aria-label={`Ймовірність сценарію F${j + 1}`}
+                    value={p}
                         onChange={e => handleProb(j, e)}
                         className="w-full rounded-lg border border-indigo-300 dark:border-indigo-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-center text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:text-gray-100 transition-colors"
                       />
@@ -145,12 +155,14 @@ export default function Lab2Page() {
             </table>
           </div>
 
+          <ProbabilityNotice probabilities={probabilities} />
+
           {/* Add row button */}
           <button
             onClick={addRow}
             className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600 transition-colors"
           >
-            + Стратегія
+            + Альтернатива
           </button>
         </div>
       </section>
@@ -162,7 +174,12 @@ export default function Lab2Page() {
             Результати за критеріями
           </h2>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <p className="mb-4 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+            Очікуваний виграш варто збільшувати, а максимальні втрачені можливості —
+            зменшувати. Стабільність оцінюйте разом із виграшем: найменші коливання
+            самі по собі не роблять рішення найвигіднішим.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {/* ── Card 1: Expected Value (КОЗ) ── */}
             {ev && (
               <div className="rounded-xl border-2 border-emerald-300 dark:border-emerald-700 bg-white dark:bg-gray-900 p-4 shadow-sm transition-all hover:shadow-md">
@@ -173,6 +190,11 @@ export default function Lab2Page() {
                   MV_i = Σⱼ(aᵢⱼ · pⱼ) → max
                 </p>
 
+                <p className="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                  Середній виграш з урахуванням шансів кожного сценарію. Більше — краще.
+                  За багаторазового повторення він є орієнтиром для середнього результату,
+                  проте не гарантує виграш в окремому випадку.
+                </p>
                 <div className="mt-3 space-y-1">
                   {ev.values.map((v, i) => {
                     const isBest = i === ev.bestIdx
@@ -214,12 +236,17 @@ export default function Lab2Page() {
                   rᵢⱼ = max(Fⱼ) − aᵢⱼ → min maxⱼ rᵢⱼ
                 </p>
 
+                <p className="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                  Кожна клітинка показує, скільки виграшу ви недоотримаєте порівняно
+                  з найкращим рішенням за того самого сценарію. «max» — найбільша така
+                  втрата для рядка. Кращий варіант має найменший «max». Ймовірності не враховуються.
+                </p>
                 {/* Risk matrix (compact) */}
                 <div className="mt-3 overflow-x-auto">
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="text-gray-500 dark:text-gray-400">
-                        <th className="py-1 pr-2 text-left font-medium">Ризик</th>
+                        <th className="py-1 pr-2 text-left font-medium">Втрачений виграш</th>
                         {savage.riskMatrix[0]?.map((_, j) => (
                           <th key={j} className="py-1 px-1 font-medium text-center">
                             F{j + 1}
@@ -243,11 +270,11 @@ export default function Lab2Page() {
                             <td className="py-1 pr-2 font-medium">A{i + 1}</td>
                             {row.map((v, j) => (
                               <td key={j} className="py-1 px-1 text-center">
-                                {v.toFixed(0)}
+                                {v.toFixed(2)}
                               </td>
                             ))}
                             <td className="py-1 pl-2 text-center font-semibold">
-                              {savage.maxRisks[i].toFixed(0)}
+                              {savage.maxRisks[i].toFixed(2)}
                             </td>
                           </tr>
                         )
@@ -262,7 +289,7 @@ export default function Lab2Page() {
                     A{savage.bestIdx + 1}
                   </span>
                   <span className="ml-1 text-sm text-gray-600 dark:text-gray-400">
-                    (max ризик = {savage.best.toFixed(0)})
+                    (max втрачений виграш = {savage.best.toFixed(2)})
                   </span>
                 </div>
               </div>
@@ -272,12 +299,16 @@ export default function Lab2Page() {
             {variance && (
               <div className="rounded-xl border-2 border-violet-300 dark:border-violet-700 bg-white dark:bg-gray-900 p-4 shadow-sm transition-all hover:shadow-md">
                 <h3 className="text-base font-bold text-gray-800 dark:text-gray-100">
-                  Стабільність (MV + дисперсія)
+                  Стабільність результату
                 </h3>
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 font-mono">
                   V_i = (σ_i / |MV_i|) · 100%
                 </p>
 
+                <p className="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                  Показує, наскільки результати можуть відхилятися від середнього.
+                  Порівнюйте очікуваний виграш і розкид відповідно до прийнятного для вас ризику.
+                </p>
                 <div className="mt-3 overflow-x-auto">
                   <table className="w-full text-xs">
                     <thead>
@@ -328,7 +359,7 @@ export default function Lab2Page() {
                             <td className="py-1 px-1 text-center">
                               {variance.stdDevs[i].toFixed(2)}
                             </td>
-                            <td className="py-1 pl-1 text-center">{variance.cvs[i].toFixed(1)}%</td>
+                            <td className="py-1 pl-1 text-center">{Number.isFinite(variance.cvs[i]) ? `${variance.cvs[i].toFixed(1)}%` : '—'}</td>
                           </tr>
                         )
                       })}
@@ -336,23 +367,34 @@ export default function Lab2Page() {
                   </table>
                 </div>
 
-                <div className="mt-3 flex gap-2">
+                <dl className="mt-4 space-y-2 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+                  <div><dt className="inline font-semibold">MV — </dt><dd className="inline">очікуваний виграш, у тих самих одиницях, що й таблиця.</dd></div>
+                  <div><dt className="inline font-semibold">D — </dt><dd className="inline">дисперсія: зважений середній квадрат відхилень від MV; одиниці виміру — у квадраті.</dd></div>
+                  <div><dt className="inline font-semibold">σ — </dt><dd className="inline">стандартне відхилення, √D. Розкид у вихідних одиницях: менше значення означає менші коливання.</dd></div>
+                  <div><dt className="inline font-semibold">V — </dt><dd className="inline">розкид відносно |MV| у відсотках. Менше — стабільніше відносно середнього. За MV = 0 не визначений (—); поблизу нуля дуже чутливий. Позначка ◆ порівнює лише варіанти з додатним MV.</dd></div>
+                </dl>
+                <div className="mt-3 flex flex-wrap gap-2">
                   <div className="flex-1 rounded-lg bg-violet-50 dark:bg-violet-900/40 px-2 py-1.5 text-center">
-                    <div className="text-[10px] text-gray-500 dark:text-gray-400">★ Max MV</div>
+                    <div className="text-[10px] text-gray-500 dark:text-gray-400">★ Найвищий виграш</div>
                     <span className="font-bold text-violet-700 dark:text-violet-300 text-sm">
                       A{variance.bestEvIdx + 1}
                     </span>
                   </div>
                   <div className="flex-1 rounded-lg bg-amber-50 dark:bg-amber-900/40 px-2 py-1.5 text-center">
-                    <div className="text-[10px] text-gray-500 dark:text-gray-400">◆ Min V</div>
+                    <div className="text-[10px] text-gray-500 dark:text-gray-400">◆ Найменший V (MV &gt; 0)</div>
                     <span className="font-bold text-amber-700 dark:text-amber-300 text-sm">
-                      A{variance.bestCvIdx + 1}
+                      {variance.bestCvIdx >= 0 ? `A${variance.bestCvIdx + 1}` : 'Немає варіантів'}
                     </span>
                   </div>
                 </div>
               </div>
             )}
           </div>
+          <p className="mt-4 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+            Різні критерії можуть рекомендувати різні альтернативи. Підсвічування —
+            підказка для порівняння, а остаточний вибір залежить від ваших цілей.
+            За однакових найкращих оцінок у підсумку показано перший варіант.
+          </p>
         </section>
       )}
     </div>

@@ -137,13 +137,14 @@ export function calcVariance(matrix: number[][], probabilities: number[]) {
   const stdDevs = dispersions.map((d) => Math.sqrt(d));
 
   const cvs = ev.values.map((mv, i) =>
-    mv !== 0 ? (stdDevs[i] / Math.abs(mv)) * 100 : 0,
+    mv !== 0 ? (stdDevs[i] / Math.abs(mv)) * 100 : Number.NaN,
   );
 
   // Best stability: lowest CV (among those with positive MV)
   const bestCvIdx = cvs.reduce(
-    (minIdx, cv, i) => (cv < cvs[minIdx] ? i : minIdx),
-    0,
+    (minIdx, cv, i) =>
+      ev.values[i] > 0 && Number.isFinite(cv) && (minIdx < 0 || cv < cvs[minIdx]) ? i : minIdx,
+    -1,
   );
 
   return {
