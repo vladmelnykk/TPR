@@ -5,7 +5,8 @@ import ThemeToggle from '../components/ThemeToggle'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Аналіз альтернатив в умовах невизначеності', active: true },
-  { to: '/risk', label: 'Вибір рішення в умовах ризику', active: true }
+  { to: '/risk', label: 'Вибір рішення в умовах ризику', active: true },
+  { to: '/group-decisions', label: 'Групове прийняття рішень', active: true }
 ]
 
 export default function AppLayout() {
