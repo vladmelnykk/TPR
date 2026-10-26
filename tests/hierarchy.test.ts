@@ -42,9 +42,9 @@ test('суперечливий цикл переваг виявляється я
 test('один рівень: точне поєднання локальних оцінок із вагами критеріїв', () => {
   const model = createHierarchyExample(false)
   const result = evaluateHierarchy(model.root, model.alternatives)
-  const location = analyzeMatrix(model.root.children[0].matrix).weights
-  const reputation = analyzeMatrix(model.root.children[1].matrix).weights
-  result.scores.forEach((score, i) => close(score, location[i] / 6 + reputation[i] * 5 / 6))
+  const cost = analyzeMatrix(model.root.children[0].matrix).weights
+  const features = analyzeMatrix(model.root.children[1].matrix).weights
+  result.scores.forEach((score, i) => close(score, cost[i] / 6 + features[i] * 5 / 6))
   close(result.scores.reduce((a, b) => a + b, 0), 1)
   assert.equal(result.ranking[0].id, 'a')
   assert.equal(result.inconsistent.length, 0)
@@ -77,10 +77,10 @@ test('додавання підкритерію переносить оцінк�
   const initial = useHierarchyStore.getState()
   try {
     const before = initial.root.children[0].matrix
-    initial.addCriterion('single-location')
+    initial.addCriterion('single-cost')
     let state = useHierarchyStore.getState()
     assert.deepEqual(state.root.children[0].children[0].matrix, before)
-    initial.addCriterion('single-location')
+    initial.addCriterion('single-cost')
     initial.addAlternative()
     state = useHierarchyStore.getState()
     verifyShape(state.root, 4)
@@ -96,8 +96,8 @@ test('видалення гілок і ліміти розміру зберіг�
   const initial = useHierarchyStore.getState()
   try {
     initial.loadExample(true)
-    initial.removeCriterion('martin')
-    initial.removeCriterion('jane')
+    initial.removeCriterion('manager')
+    initial.removeCriterion('admin')
     let state = useHierarchyStore.getState()
     verifyShape(state.root, 3)
     assert.equal(evaluateHierarchy(state.root, state.alternatives).ranking.filter(a => a.best).length, 3)
@@ -110,5 +110,31 @@ test('видалення гілок і ліміти розміру зберіг�
     state = useHierarchyStore.getState()
     assert.equal(state.alternatives.length, 2)
     verifyShape(state.root, 2)
+  } finally { useHierarchyStore.setState(initial) }
+})
+
+
+test('чиста модель прибирає введені дані та дозволяє знову завантажити приклад', () => {
+  const initial = useHierarchyStore.getState()
+  try {
+    initial.loadExample(true)
+    initial.setGoal('Інша мета')
+    initial.addAlternative()
+    initial.setComparison('root', 0, 1, 9)
+    initial.clearModel()
+    const state = useHierarchyStore.getState()
+    assert.equal(state.goal, '')
+    assert.equal(state.alternatives.length, 2)
+    assert.ok(state.alternatives.every(a => a.name === ''))
+    assert.equal(state.root.children.length, 2)
+    assert.ok(state.root.children.every(c => c.name === '' && c.matrix.every(row => row.every(v => v === 1))))
+    assert.deepEqual(state.root.matrix, [[1, 1], [1, 1]])
+    verifyShape(state.root, 2)
+    close(evaluateHierarchy(state.root, state.alternatives).scores[0], 0.5)
+    initial.loadExample(false)
+    assert.equal(useHierarchyStore.getState().goal, 'Обрати сервіс для керування командними завданнями')
+    assert.equal(useHierarchyStore.getState().alternatives.length, 3)
+    initial.loadExample(true)
+    assert.equal(evaluateHierarchy(useHierarchyStore.getState().root, useHierarchyStore.getState().alternatives).nodes.length, 7)
   } finally { useHierarchyStore.setState(initial) }
 })

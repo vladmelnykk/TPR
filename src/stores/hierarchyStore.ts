@@ -51,20 +51,34 @@ export function evaluateHierarchy(root: HierarchyNode, alternatives: Alternative
   return { scores, ranking, nodes, contributions, inconsistent: nodes.filter(item => !item.analysis.consistent) }
 }
 
-const locationMatrix = [[1, 1/2, 1/5], [2, 1, 1/2], [5, 2, 1]]
-const reputationMatrix = [[1, 2, 3], [1/2, 1, 2], [1/3, 1/2, 1]]
+const costMatrix = [[1, 1/2, 1/5], [2, 1, 1/2], [5, 2, 1]]
+const featuresMatrix = [[1, 2, 3], [1/2, 1, 2], [1/3, 1/2, 1]]
 export function createHierarchyExample(multi: boolean) {
   const criteria = (prefix: string): HierarchyNode[] => [
-    { id: `${prefix}-location`, name: 'Зручність розташування', children: [], matrix: locationMatrix.map(row => [...row]) },
-    { id: `${prefix}-reputation`, name: 'Академічна репутація', children: [], matrix: reputationMatrix.map(row => [...row]) },
+    { id: `${prefix}-cost`, name: 'Доступність вартості', children: [], matrix: costMatrix.map(row => [...row]) },
+    { id: `${prefix}-features`, name: 'Функціональні можливості', children: [], matrix: featuresMatrix.map(row => [...row]) },
   ]
   return {
-    goal: 'Обрати університет для навчання',
-    alternatives: [{ id: 'a', name: 'Університет А' }, { id: 'b', name: 'Університет Б' }, { id: 'c', name: 'Університет В' }],
+    goal: 'Обрати сервіс для керування командними завданнями',
+    alternatives: [{ id: 'a', name: 'Планер А' }, { id: 'b', name: 'Планер Б' }, { id: 'c', name: 'Планер В' }],
     root: multi ? { id: 'root', name: 'Мета', matrix: equalMatrix(2), children: [
-      { id: 'martin', name: 'Погляд Мартіна', matrix: [[1, 1/5], [5, 1]], children: criteria('martin') },
-      { id: 'jane', name: 'Погляд Джейн', matrix: [[1, 3], [1/3, 1]], children: criteria('jane') },
+      { id: 'manager', name: 'Потреби керівника проєкту', matrix: [[1, 1/5], [5, 1]], children: criteria('manager') },
+      { id: 'admin', name: 'Потреби адміністратора', matrix: [[1, 3], [1/3, 1]], children: criteria('admin') },
     ] } : { id: 'root', name: 'Мета', matrix: [[1, 1/5], [5, 1]], children: criteria('single') },
+  }
+}
+
+export function createEmptyHierarchy() {
+  return {
+    goal: '',
+    alternatives: [{ id: 'blank-a', name: '' }, { id: 'blank-b', name: '' }],
+    root: {
+      id: 'root', name: 'Мета', matrix: equalMatrix(2),
+      children: [
+        { id: 'blank-criterion-1', name: '', children: [], matrix: equalMatrix(2) },
+        { id: 'blank-criterion-2', name: '', children: [], matrix: equalMatrix(2) },
+      ],
+    } satisfies HierarchyNode,
   }
 }
 
@@ -83,6 +97,7 @@ interface HierarchyState {
   root: HierarchyNode
   setGoal: (goal: string) => void
   loadExample: (multi: boolean) => void
+  clearModel: () => void
   renameNode: (id: string, name: string) => void
   addCriterion: (parentId: string) => void
   removeCriterion: (id: string) => void
@@ -96,6 +111,7 @@ export const useHierarchyStore = create<HierarchyState>(set => ({
   ...createHierarchyExample(false),
   setGoal: goal => set({ goal }),
   loadExample: multi => set(createHierarchyExample(multi)),
+  clearModel: () => set(createEmptyHierarchy()),
   renameNode: (id, name) => set(s => ({ root: mapNode(s.root, id, node => ({ ...node, name })) })),
   addCriterion: parentId => set(s => ({ root: mapNode(s.root, parentId, node => {
     if (node.children.length >= 9) return node
