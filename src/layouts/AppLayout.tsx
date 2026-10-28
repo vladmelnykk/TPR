@@ -7,7 +7,8 @@ const NAV_ITEMS = [
   { to: '/', label: 'Аналіз альтернатив в умовах невизначеності', active: true },
   { to: '/risk', label: 'Вибір рішення в умовах ризику', active: true },
   { to: '/group-decisions', label: 'Групове прийняття рішень', active: true },
-  { to: '/hierarchy', label: 'Аналіз ієрархій', active: true }
+  { to: '/hierarchy', label: 'Аналіз ієрархій', active: true },
+  { to: '/conflicting-criteria', label: 'Вибір за конфліктними критеріями', active: true }
 ]
 
 export default function AppLayout() {
